@@ -28,6 +28,15 @@ async function run() {
   try {
     // Connect the client to the server	(optional starting in v4.7)
     await client.connect();
+
+    const trainerCollection = client.db("BiLang").collection("trainers");
+
+    app.post("/add-tutorials", async (req, res) => {
+      const data = req.body;
+      const result = await trainerCollection.insertOne(data);
+      res.send(result);
+    });
+
     // Send a ping to confirm a successful connection
     await client.db("admin").command({ ping: 1 });
     console.log(
@@ -41,7 +50,7 @@ async function run() {
 run().catch(console.dir);
 
 app.get("/", (req, res) => {
-  res.send("BiLang server is running");
+  res.send("BiLang server is running.");
 });
 
 app.listen(port, () => {
