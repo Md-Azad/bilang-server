@@ -30,6 +30,10 @@ async function run() {
     await client.connect();
 
     const trainerCollection = client.db("BiLang").collection("trainers");
+    app.get("/add-tutorials", async (req, res) => {
+      const result = await trainerCollection.find().toArray();
+      res.send(result);
+    });
 
     app.post("/add-tutorials", async (req, res) => {
       const data = req.body;
