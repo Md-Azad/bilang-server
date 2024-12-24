@@ -3,7 +3,7 @@ const cors = require("cors");
 require("dotenv").config();
 const port = process.env.PORT || 3000;
 
-const { MongoClient, ServerApiVersion } = require("mongodb");
+const { MongoClient, ServerApiVersion, ObjectId } = require("mongodb");
 const app = express();
 
 // middlewares
@@ -32,6 +32,14 @@ async function run() {
     const trainerCollection = client.db("BiLang").collection("trainers");
     app.get("/add-tutorials", async (req, res) => {
       const result = await trainerCollection.find().toArray();
+      res.send(result);
+    });
+
+    app.get("/tutor/:id", async (req, res) => {
+      const id = req.params.id;
+      const query = { _id: new ObjectId(id) };
+      const result = await trainerCollection.findOne(query);
+
       res.send(result);
     });
 
