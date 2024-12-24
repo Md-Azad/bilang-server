@@ -29,23 +29,30 @@ async function run() {
     // Connect the client to the server	(optional starting in v4.7)
     await client.connect();
 
-    const trainerCollection = client.db("BiLang").collection("trainers");
+    const tutorialCollection = client.db("BiLang").collection("tutorials");
     app.get("/add-tutorials", async (req, res) => {
-      const result = await trainerCollection.find().toArray();
+      const result = await tutorialCollection.find().toArray();
+      res.send(result);
+    });
+
+    app.get("/my-tutorials", async (req, res) => {
+      const email = req.query.email;
+      const query = { email: email };
+      const result = await tutorialCollection.find(query).toArray();
       res.send(result);
     });
 
     app.get("/tutor/:id", async (req, res) => {
       const id = req.params.id;
       const query = { _id: new ObjectId(id) };
-      const result = await trainerCollection.findOne(query);
+      const result = await tutorialCollection.findOne(query);
 
       res.send(result);
     });
 
     app.post("/add-tutorials", async (req, res) => {
       const data = req.body;
-      const result = await trainerCollection.insertOne(data);
+      const result = await tutorialCollection.insertOne(data);
       res.send(result);
     });
 
