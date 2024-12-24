@@ -30,6 +30,7 @@ async function run() {
     await client.connect();
 
     const tutorialCollection = client.db("BiLang").collection("tutorials");
+    const bookingCollection = client.db("BiLang").collection("bookings");
     app.get("/add-tutorials", async (req, res) => {
       const result = await tutorialCollection.find().toArray();
       res.send(result);
@@ -50,9 +51,22 @@ async function run() {
       res.send(result);
     });
 
+    app.get("/booking/:email", async (req, res) => {
+      const email = req.params.email;
+      const query = { email: email };
+      const result = await bookingCollection.find(query).toArray();
+      res.send(result);
+    });
+
     app.post("/add-tutorials", async (req, res) => {
       const data = req.body;
       const result = await tutorialCollection.insertOne(data);
+      console.log(data);
+      res.send(result);
+    });
+    app.post("/booking", async (req, res) => {
+      const body = req.body;
+      const result = await bookingCollection.insertOne(body);
       res.send(result);
     });
 
