@@ -31,7 +31,7 @@ async function run() {
 
     const tutorialCollection = client.db("BiLang").collection("tutorials");
     const bookingCollection = client.db("BiLang").collection("bookings");
-    app.get("/add-tutorials", async (req, res) => {
+    app.get("/all-tutorials", async (req, res) => {
       const result = await tutorialCollection.find().toArray();
       res.send(result);
     });
@@ -60,13 +60,39 @@ async function run() {
 
     app.post("/add-tutorials", async (req, res) => {
       const data = req.body;
-      const result = await tutorialCollection.insertOne(data);
-      console.log(data);
-      res.send(result);
+
+      const query = { email: data.email, language: data.language };
+      const isAlreadyHasThisLanguage = await tutorialCollection
+        .find(query)
+        .toArray();
+      console.log(isAlreadyHasThisLanguage.length);
+      if (isAlreadyHasThisLanguage.length > 0) {
+        return res
+          .status(400)
+          .json({ error: "You already added a tutorial for this language." });
+      } else {
+        const result = await tutorialCollection.insertOne(data);
+
+        res.send(result);
+      }
     });
     app.post("/booking", async (req, res) => {
       const body = req.body;
       const result = await bookingCollection.insertOne(body);
+      res.send(result);
+    });
+
+    app.patch("/add-tutorials", async (req, res) => {
+      const tutorialId = req.body.jobId;
+      const query = { _id: new ObjectId(tutorialId) };
+
+      const updateDoc = {
+        $inc: {
+          review: 1,
+        },
+      };
+      const result = await tutorialCollection.updateOne(query, updateDoc);
+
       res.send(result);
     });
 
