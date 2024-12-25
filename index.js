@@ -82,6 +82,22 @@ async function run() {
       res.send(result);
     });
 
+    app.put("/update/:id", async (req, res) => {
+      const id = req.params.id;
+      const data = req.body;
+      const query = { _id: new ObjectId(id) };
+      const updateDoc = {
+        $set: {
+          image: data.image,
+          language: data.language,
+          price: data.price,
+          description: data.description,
+        },
+      };
+      const result = await tutorialCollection.updateOne(query, updateDoc);
+      res.send(result);
+    });
+
     app.patch("/add-tutorials", async (req, res) => {
       const tutorialId = req.body.jobId;
       const query = { _id: new ObjectId(tutorialId) };
