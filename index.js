@@ -31,6 +31,7 @@ async function run() {
 
     const tutorialCollection = client.db("BiLang").collection("tutorials");
     const bookingCollection = client.db("BiLang").collection("bookings");
+    const categoriesCollection = client.db("BiLang").collection("categories");
     app.get("/all-tutorials", async (req, res) => {
       const result = await tutorialCollection.find().toArray();
       res.send(result);
@@ -55,6 +56,17 @@ async function run() {
       const email = req.params.email;
       const query = { email: email };
       const result = await bookingCollection.find(query).toArray();
+      res.send(result);
+    });
+    app.get("/categories", async (req, res) => {
+      const categories = await categoriesCollection.find().toArray();
+      res.send(categories);
+    });
+
+    app.get("/category/:category", async (req, res) => {
+      const category = req.params.category;
+      const query = { language: category };
+      const result = await tutorialCollection.find(query).toArray();
       res.send(result);
     });
 
