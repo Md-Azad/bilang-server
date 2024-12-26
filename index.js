@@ -1,5 +1,7 @@
 const express = require("express");
 const cors = require("cors");
+const jwt = require("jsonwebtoken");
+const cookieParser = require("cookie-parser");
 require("dotenv").config();
 const port = process.env.PORT || 3000;
 
@@ -10,6 +12,7 @@ const app = express();
 
 app.use(cors());
 app.use(express.json());
+app.use(cookieParser());
 
 console.log(process.env.DB_USER);
 
@@ -32,6 +35,21 @@ async function run() {
     const tutorialCollection = client.db("BiLang").collection("tutorials");
     const bookingCollection = client.db("BiLang").collection("bookings");
     const categoriesCollection = client.db("BiLang").collection("categories");
+
+    // Auth related apis.
+    app.post("/jwt", (req, res) => {
+      const user = req.body;
+      const token = jwt.sign({ user }, process.env.JWT_ACCESS_TOKEN, {
+        expiresIn: "1h",
+      });
+      res
+        .cookie("token", token, {
+          httpOnly: true,
+          secure: false,
+        })
+        .send({ message: true });
+    });
+
     app.get("/all-tutorials", async (req, res) => {
       const result = await tutorialCollection.find().toArray();
       res.send(result);
