@@ -12,7 +12,11 @@ const app = express();
 
 app.use(
   cors({
-    origin: ["http://localhost:5173"],
+    origin: [
+      "http://localhost:5173",
+      "https://bilang-57fe9.web.app",
+      "https://bilang-57fe9.firebaseapp.com",
+    ],
     credentials: true,
   })
 );
@@ -32,7 +36,6 @@ const client = new MongoClient(uri, {
 
 const verifyToken = (req, res, next) => {
   const token = req?.cookies?.token;
-  //   console.log("generated token.", token);
 
   if (!token) {
     return res.status(401).send({ message: "Unauthorized access." });
@@ -50,7 +53,7 @@ const verifyToken = (req, res, next) => {
 async function run() {
   try {
     // Connect the client to the server	(optional starting in v4.7)
-    await client.connect();
+    // await client.connect();
 
     const tutorialCollection = client.db("BiLang").collection("tutorials");
     const bookingCollection = client.db("BiLang").collection("bookings");
@@ -65,7 +68,8 @@ async function run() {
       res
         .cookie("token", token, {
           httpOnly: true,
-          secure: false,
+          secure: process.env.NODE_ENV === "production",
+          sameSite: process.env.NODE_ENV === "production" ? "none" : "strict",
         })
         .send({ message: true });
     });
@@ -73,7 +77,8 @@ async function run() {
     app.post("/logout", (req, res) => {
       res.clearCookie("token", {
         httpOnly: true,
-        secure: false,
+        secure: process.env.NODE_ENV === "production",
+        sameSite: process.env.NODE_ENV === "production" ? "none" : "strict",
       });
       return res.status(200).send({ message: "Logged out successfully" });
     });
@@ -191,10 +196,10 @@ async function run() {
     });
 
     // Send a ping to confirm a successful connection
-    await client.db("admin").command({ ping: 1 });
-    console.log(
-      "Pinged your deployment. You successfully connected to MongoDB!"
-    );
+    // await client.db("admin").command({ ping: 1 });
+    // console.log(
+    //   "Pinged your deployment. You successfully connected to MongoDB!"
+    // );
   } finally {
     // Ensures that the client will close when you finish/error
     // await client.close();
