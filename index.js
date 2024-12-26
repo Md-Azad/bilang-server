@@ -32,6 +32,7 @@ const client = new MongoClient(uri, {
 
 const verifyToken = (req, res, next) => {
   const token = req?.cookies?.token;
+  //   console.log("generated token.", token);
 
   if (!token) {
     return res.status(401).send({ message: "Unauthorized access." });
@@ -41,7 +42,6 @@ const verifyToken = (req, res, next) => {
       return res.status(401).send({ message: "Unauthorized access" });
     }
     req.user = decoded;
-    console.log(req.user);
 
     next();
   });
@@ -63,7 +63,7 @@ async function run() {
         expiresIn: "1h",
       });
       res
-        .cookie("secret", token, {
+        .cookie("token", token, {
           httpOnly: true,
           secure: false,
         })
@@ -71,7 +71,7 @@ async function run() {
     });
 
     app.post("/logout", (req, res) => {
-      res.clearCookie("secret", {
+      res.clearCookie("token", {
         httpOnly: true,
         secure: false,
       });
@@ -94,17 +94,26 @@ async function run() {
       res.send(result);
     });
 
-    app.get("/tutor/:id", async (req, res) => {
+    app.get("/tutor/:id", verifyToken, async (req, res) => {
       const id = req.params.id;
+      console.log("tutor", req.body);
       const query = { _id: new ObjectId(id) };
+
       const result = await tutorialCollection.findOne(query);
 
       res.send(result);
     });
 
-    app.get("/booking/:email", async (req, res) => {
+    app.get("/booking/:email", verifyToken, async (req, res) => {
       const email = req.params.email;
       const query = { email: email };
+      if (req.user.user.email === req.params.email) {
+        console.log("matched");
+      }
+      if (req.user.user.email !== req.params.email) {
+        console.log("not matched");
+        return res.status(403).send({ message: "Forbiden access" });
+      }
       const result = await bookingCollection.find(query).toArray();
       res.send(result);
     });
