@@ -32,7 +32,7 @@ const client = new MongoClient(uri, {
 
 const verifyToken = (req, res, next) => {
   const token = req?.cookies?.token;
-  console.log(token);
+
   if (!token) {
     return res.status(401).send({ message: "Unauthorized access." });
   }
@@ -63,11 +63,19 @@ async function run() {
         expiresIn: "1h",
       });
       res
-        .cookie("token", token, {
+        .cookie("secret", token, {
           httpOnly: true,
           secure: false,
         })
         .send({ message: true });
+    });
+
+    app.post("/logout", (req, res) => {
+      res.clearCookie("secret", {
+        httpOnly: true,
+        secure: false,
+      });
+      return res.status(200).send({ message: "Logged out successfully" });
     });
 
     app.get("/all-tutorials", async (req, res) => {
