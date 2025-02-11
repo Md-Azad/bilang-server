@@ -134,6 +134,32 @@ async function run() {
       res.send(result);
     });
 
+    // stats api
+    app.get("/stats", async (req, res) => {
+      try {
+        // Use aggregation to calculate the sum of the `review` field
+        const result = await tutorialCollection
+          .aggregate([
+            {
+              $group: {
+                _id: null, // Group all documents together
+                totalReviews: { $sum: "$review" }, // Sum the `review` field
+              },
+            },
+          ])
+          .toArray();
+
+        // Extract the totalReviews from the result
+        const totalReviews = result[0]?.totalReviews || 0;
+
+        // Send the totalReviews in the response
+        res.send({ totalReviews });
+      } catch (error) {
+        console.error("Error fetching data:", error);
+        res.status(500).send("Internal Server Error");
+      }
+    });
+
     app.post("/add-tutorials", async (req, res) => {
       const data = req.body;
 
