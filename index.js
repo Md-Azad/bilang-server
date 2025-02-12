@@ -135,25 +135,37 @@ async function run() {
     });
 
     // stats api
+
     app.get("/stats", async (req, res) => {
       try {
-        // Use aggregation to calculate the sum of the `review` field
+        // Use aggregation to calculate the total sum of reviews, total number of unique tutors, and total number of unique languages
         const result = await tutorialCollection
           .aggregate([
             {
               $group: {
                 _id: null, // Group all documents together
                 totalReviews: { $sum: "$review" }, // Sum the `review` field
+                uniqueEmails: { $addToSet: "$email" }, // Collect unique emails
+                uniqueLanguages: { $addToSet: "$language" }, // Collect unique languages
+              },
+            },
+            {
+              $project: {
+                totalReviews: 1, // Include totalReviews in the result
+                totalTutors: { $size: "$uniqueEmails" }, // Count the number of unique emails
+                totalLanguages: { $size: "$uniqueLanguages" }, // Count the number of unique languages
               },
             },
           ])
           .toArray();
 
-        // Extract the totalReviews from the result
+        // Extract the totalReviews, totalTutors, and totalLanguages from the result
         const totalReviews = result[0]?.totalReviews || 0;
+        const totalTutors = result[0]?.totalTutors || 0;
+        const totalLanguages = result[0]?.totalLanguages || 0;
 
-        // Send the totalReviews in the response
-        res.send({ totalReviews });
+        // Send the totalReviews, totalTutors, and totalLanguages in the response
+        res.send({ totalReviews, totalTutors, totalLanguages });
       } catch (error) {
         console.error("Error fetching data:", error);
         res.status(500).send("Internal Server Error");
