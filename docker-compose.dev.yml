@@ -1,32 +1,40 @@
-version: '3.8'
-
 services:
   app:
-    build: .
+    image: bilang:${IMAGE_TAG}
+
     ports:
       - "3000:3000"
+
     environment:
       - NODE_ENV=development
       - PORT=3000
       - DB_USER=${DB_USER}
       - DB_PASSWORD=${DB_PASSWORD}
+
     depends_on:
       - mongodb
+
     networks:
       - bilang-network
+
     restart: unless-stopped
 
   mongodb:
     image: mongo:7
+
     ports:
       - "27017:27017"
+
     environment:
       - MONGO_INITDB_ROOT_USERNAME=${DB_USER:-admin}
       - MONGO_INITDB_ROOT_PASSWORD=${DB_PASSWORD:-password}
+
     volumes:
       - mongodb_data:/data/db
+
     networks:
       - bilang-network
+
     restart: unless-stopped
 
 volumes:
