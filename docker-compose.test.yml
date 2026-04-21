@@ -1,6 +1,6 @@
 services:
   app:
-    image: bilang:${IMAGE_TAG}
+    image: azad4110/prime:${IMAGE_TAG}
 
     ports:
       - "3000:3000"
